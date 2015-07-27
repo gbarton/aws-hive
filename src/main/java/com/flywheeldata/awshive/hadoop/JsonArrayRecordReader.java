@@ -19,11 +19,10 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-import org.json.simple.parser.JSONParser;
 
 import com.flywheeldata.awshive.hadoop.util.JsonArrayReader;
 
-public class CloudTrailsRecordReader extends RecordReader<LongWritable, Text> {
+public class JsonArrayRecordReader extends RecordReader<LongWritable, Text> {
 	long start;
 	long end;
 	long pos;
@@ -35,10 +34,14 @@ public class CloudTrailsRecordReader extends RecordReader<LongWritable, Text> {
 	Reader r;
 	Pattern whitespace = Pattern.compile("\\s");
 
+	String anchor;
+	
 	LongWritable key;
 	Text value;
-
-	JSONParser parser;
+	
+	public JsonArrayRecordReader(String anchor) {
+		this.anchor = anchor;
+	}
 
 	@Override
 	public void initialize(InputSplit genericSplit, TaskAttemptContext context)
@@ -58,12 +61,12 @@ public class CloudTrailsRecordReader extends RecordReader<LongWritable, Text> {
 			isCompressedInput = true;
 			decompressor = CodecPool.getDecompressor(codec);
 
-			in = new JsonArrayReader(codec.createInputStream(fileIn, decompressor), "eventID");
+			in = new JsonArrayReader(codec.createInputStream(fileIn, decompressor), anchor);
 			filePosition = fileIn;
 
 		} else {
 			fileIn.seek(start);
-			in = new JsonArrayReader(fileIn, "eventID");
+			in = new JsonArrayReader(fileIn, anchor);
 			filePosition = fileIn;
 		}
 

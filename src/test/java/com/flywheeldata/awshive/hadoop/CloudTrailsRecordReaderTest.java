@@ -24,12 +24,12 @@ public class CloudTrailsRecordReaderTest {
 		context = new TaskAttemptContextImpl(conf, new TaskAttemptID());
 	}
 
-	private CloudTrailsRecordReader getReader(String filePath) throws IOException, InterruptedException {
+	private JsonArrayRecordReader getReader(String filePath) throws IOException, InterruptedException {
 		File testFile = new File(filePath);
 		Path path = new Path(testFile.getAbsoluteFile().toURI());
 		FileSplit split = new FileSplit(path, 0, testFile.length(), null);
 
-		CloudTrailsRecordReader reader = new CloudTrailsRecordReader();
+		JsonArrayRecordReader reader = new JsonArrayRecordReader();
 		reader.initialize(split, context);
 
 		return reader;
@@ -37,7 +37,7 @@ public class CloudTrailsRecordReaderTest {
 
 	@Test
 	public void TestBasicInitialize() throws IOException, InterruptedException {
-		CloudTrailsRecordReader reader = getReader(
+		JsonArrayRecordReader reader = getReader(
 				"src/test/resources/735407941533_CloudTrail_us-west-2_20150708T2150Z_0luMEQj0VDBc0YyA.json");
 		Assert.assertNotNull(reader);
 
@@ -48,7 +48,7 @@ public class CloudTrailsRecordReaderTest {
 
 	@Test
 	public void TestRead() throws IOException, InterruptedException {
-		CloudTrailsRecordReader reader = getReader(
+		JsonArrayRecordReader reader = getReader(
 				"src/test/resources/735407941533_CloudTrail_us-west-2_20150708T2150Z_0luMEQj0VDBc0YyA.json");
 
 		reader.nextKeyValue();
