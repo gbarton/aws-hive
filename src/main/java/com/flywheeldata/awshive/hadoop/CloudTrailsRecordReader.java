@@ -2,7 +2,10 @@ package com.flywheeldata.awshive.hadoop;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
+import java.util.regex.Pattern;
 
+import org.apache.directory.api.util.exception.NotImplementedException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -20,18 +23,26 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.json.simple.parser.JSONParser;
 
+import com.flywheeldata.awshive.Utility;
+import com.flywheeldata.awshive.hadoop.util.JsonReader;
+
 public class CloudTrailsRecordReader extends RecordReader<LongWritable, Text> {
 	long start;
 	long end;
 	long pos;
 	FSDataInputStream fileIn;
-	InputStream in;
+	JsonReader in;
 	boolean isCompressedInput;
 	Decompressor decompressor;
 	Seekable filePosition;
+	Reader r;
+	Pattern whitespace = Pattern.compile("\\s");
+
+	LongWritable key;
+	Text value;
 
 	JSONParser parser;
-	
+
 	@Override
 	public void initialize(InputSplit genericSplit, TaskAttemptContext context)
 			throws IOException, InterruptedException {
@@ -50,39 +61,61 @@ public class CloudTrailsRecordReader extends RecordReader<LongWritable, Text> {
 			isCompressedInput = true;
 			decompressor = CodecPool.getDecompressor(codec);
 
-			in = codec.createInputStream(fileIn, decompressor);
-			// in = new SplitLineReader(codec.createInputStream(fileIn,
-			// decompressor), job, this.recordDelimiterBytes);
+			in = new JsonReader(codec.createInputStream(fileIn, decompressor), "eventID");
 			filePosition = fileIn;
 
 		} else {
 			fileIn.seek(start);
-			in = fileIn;
-			// in = new SplitLineReader(fileIn, job, this.recordDelimiterBytes);
+			in = new JsonReader(fileIn, "eventID");
 			filePosition = fileIn;
 		}
 
+		start += in.findNextRecord();
 		this.pos = start;
-		
-		parser = new JSONParser();
+	}
+
+	private long getFilePosition() throws IOException {
+		long retVal;
+		if (isCompressedInput && null != filePosition) {
+			retVal = filePosition.getPos();
+		} else {
+			retVal = pos;
+		}
+		return retVal;
 	}
 
 	@Override
 	public boolean nextKeyValue() throws IOException, InterruptedException {
-		// TODO Auto-generated method stub
-		return false;
+		int recordSize = 0;
+
+		if (key == null) {
+			key = new LongWritable();
+		}
+		key.set(pos);
+		if (value == null) {
+			value = new Text();
+		}
+
+		recordSize = in.getRecord(value);
+		pos += recordSize;
+
+		if (recordSize == 0) {
+			key = null;
+			value = null;
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	@Override
 	public LongWritable getCurrentKey() throws IOException, InterruptedException {
-		// TODO Auto-generated method stub
-		return null;
+		return key;
 	}
 
 	@Override
 	public Text getCurrentValue() throws IOException, InterruptedException {
-		// TODO Auto-generated method stub
-		return null;
+		return value;
 	}
 
 	@Override
@@ -96,5 +129,4 @@ public class CloudTrailsRecordReader extends RecordReader<LongWritable, Text> {
 		// TODO Auto-generated method stub
 
 	}
-
 }
