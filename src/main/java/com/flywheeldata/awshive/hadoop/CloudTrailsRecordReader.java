@@ -1,11 +1,9 @@
 package com.flywheeldata.awshive.hadoop;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Reader;
 import java.util.regex.Pattern;
 
-import org.apache.directory.api.util.exception.NotImplementedException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -23,15 +21,14 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.json.simple.parser.JSONParser;
 
-import com.flywheeldata.awshive.Utility;
-import com.flywheeldata.awshive.hadoop.util.JsonReader;
+import com.flywheeldata.awshive.hadoop.util.JsonArrayReader;
 
 public class CloudTrailsRecordReader extends RecordReader<LongWritable, Text> {
 	long start;
 	long end;
 	long pos;
 	FSDataInputStream fileIn;
-	JsonReader in;
+	JsonArrayReader in;
 	boolean isCompressedInput;
 	Decompressor decompressor;
 	Seekable filePosition;
@@ -61,12 +58,12 @@ public class CloudTrailsRecordReader extends RecordReader<LongWritable, Text> {
 			isCompressedInput = true;
 			decompressor = CodecPool.getDecompressor(codec);
 
-			in = new JsonReader(codec.createInputStream(fileIn, decompressor), "eventID");
+			in = new JsonArrayReader(codec.createInputStream(fileIn, decompressor), "eventID");
 			filePosition = fileIn;
 
 		} else {
 			fileIn.seek(start);
-			in = new JsonReader(fileIn, "eventID");
+			in = new JsonArrayReader(fileIn, "eventID");
 			filePosition = fileIn;
 		}
 
@@ -126,7 +123,9 @@ public class CloudTrailsRecordReader extends RecordReader<LongWritable, Text> {
 
 	@Override
 	public void close() throws IOException {
-		// TODO Auto-generated method stub
+		if (null != in) {
+			in.close();
+		}
 
 	}
 }

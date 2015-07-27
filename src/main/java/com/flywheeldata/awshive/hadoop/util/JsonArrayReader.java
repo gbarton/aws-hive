@@ -10,9 +10,9 @@ import org.apache.hadoop.io.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JsonReader implements Closeable {
+public class JsonArrayReader implements Closeable {
 	private static final int DEFAULT_BUFFER_SIZE = 8192;
-	public static final Logger LOG = LoggerFactory.getLogger(JsonReader.class);
+	public static final Logger LOG = LoggerFactory.getLogger(JsonArrayReader.class);
 
 	int bufferSize;
 	InputStream in;
@@ -23,11 +23,11 @@ public class JsonReader implements Closeable {
 	int bufferLength = 0;
 	int bufferPosition = 0;
 
-	public JsonReader(InputStream in, String anchor) {
+	public JsonArrayReader(InputStream in, String anchor) {
 		this(in, anchor, DEFAULT_BUFFER_SIZE);
 	}
 
-	public JsonReader(InputStream in, String anchor, int bufferSize) {
+	public JsonArrayReader(InputStream in, String anchor, int bufferSize) {
 		this.in = in;
 		this.anchor = anchor;
 		this.bufferSize = bufferSize;
