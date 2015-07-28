@@ -44,7 +44,6 @@ public class JsonArrayReader implements Closeable {
 		int charsRead = 0;
 		int currentChar;
 		Stack<Integer> bracesStack = new Stack<Integer>();
-		StringBuffer strBuffer = new StringBuffer();
 
 		int start = bufferPosition;
 

@@ -16,7 +16,7 @@ public class Generator {
 	public static void main(String[] args) throws IOException, ParseException {
 		Options opts = new Options();
 		opts.addOption("t", "type", true,
-				"The type of record to generate, currently supported options are: CloudTrails");
+				"The type of record to generate, currently supported options are: CloudTrails, DummyKV");
 		opts.addOption("c", "count", true, "the number of records to generate");
 
 		CommandLineParser parser = new BasicParser();
@@ -34,6 +34,13 @@ public class Generator {
 				ctec.GenerateEvent();
 			}
 			JSONValue.writeJSONString(ctec, writer);
+			break;
+		case "DummyKV":
+			KeyValue kv = new KeyValue();
+			for (int n = 0; n < count; n++) {
+				kv.addValue();
+			}
+			JSONValue.writeJSONString(kv, writer);
 			break;
 		default:
 			break;
