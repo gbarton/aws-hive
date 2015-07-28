@@ -15,14 +15,13 @@ import org.apache.hadoop.io.compress.CodecPool;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.io.compress.Decompressor;
-import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.RecordReader;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.mapred.FileSplit;
+import org.apache.hadoop.mapred.InputSplit;
+import org.apache.hadoop.mapred.RecordReader;
 
 import com.flywheeldata.awshive.hadoop.util.JsonArrayReader;
 
-public class JsonArrayRecordReader extends RecordReader<LongWritable, Text> {
+public class JsonArrayRecordReader implements RecordReader<LongWritable, Text> {
 	long start;
 	long end;
 	long pos;
@@ -35,19 +34,19 @@ public class JsonArrayRecordReader extends RecordReader<LongWritable, Text> {
 	Pattern whitespace = Pattern.compile("\\s");
 
 	String anchor;
-	
+
 	LongWritable key;
 	Text value;
-	
-	public JsonArrayRecordReader(String anchor) {
+
+	public JsonArrayRecordReader(InputSplit split, Configuration job, String anchor)
+			throws IOException {
 		this.anchor = anchor;
+		initialize(split, job);
 	}
 
-	@Override
-	public void initialize(InputSplit genericSplit, TaskAttemptContext context)
-			throws IOException, InterruptedException {
+	public void initialize(InputSplit genericSplit, Configuration job) throws IOException {
 		FileSplit split = (FileSplit) genericSplit;
-		Configuration job = context.getConfiguration();
+
 		start = split.getStart();
 		end = start + split.getLength();
 		final Path file = split.getPath();
@@ -85,7 +84,15 @@ public class JsonArrayRecordReader extends RecordReader<LongWritable, Text> {
 	}
 
 	@Override
-	public boolean nextKeyValue() throws IOException, InterruptedException {
+	public void close() throws IOException {
+		if (null != in) {
+			in.close();
+		}
+
+	}
+
+	@Override
+	public boolean next(LongWritable key, Text value) throws IOException {
 		int recordSize = 0;
 
 		if (key == null) {
@@ -109,26 +116,24 @@ public class JsonArrayRecordReader extends RecordReader<LongWritable, Text> {
 	}
 
 	@Override
-	public LongWritable getCurrentKey() throws IOException, InterruptedException {
-		return key;
+	public LongWritable createKey() {
+		return new LongWritable();
 	}
 
 	@Override
-	public Text getCurrentValue() throws IOException, InterruptedException {
-		return value;
+	public Text createValue() {
+		return new Text();
 	}
 
 	@Override
-	public float getProgress() throws IOException, InterruptedException {
+	public long getPos() throws IOException {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public void close() throws IOException {
-		if (null != in) {
-			in.close();
-		}
-
+	public float getProgress() throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }
