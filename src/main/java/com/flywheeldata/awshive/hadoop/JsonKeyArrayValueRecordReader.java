@@ -4,38 +4,30 @@ import java.io.IOException;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.RecordReader;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapred.RecordReader;
 
-public class JsonKeyArrayValueRecordReader extends RecordReader<LongWritable, Text> {
+public class JsonKeyArrayValueRecordReader implements RecordReader<LongWritable, Text> {
 
 	@Override
-	public void initialize(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean nextKeyValue() throws IOException, InterruptedException {
+	public boolean next(LongWritable key, Text value) throws IOException {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public LongWritable getCurrentKey() throws IOException, InterruptedException {
+	public LongWritable createKey() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Text getCurrentValue() throws IOException, InterruptedException {
+	public Text createValue() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public float getProgress() throws IOException, InterruptedException {
+	public long getPos() throws IOException {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -43,7 +35,13 @@ public class JsonKeyArrayValueRecordReader extends RecordReader<LongWritable, Te
 	@Override
 	public void close() throws IOException {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	@Override
+	public float getProgress() throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }
