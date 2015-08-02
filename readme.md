@@ -49,3 +49,54 @@ STORED AS INPUTFORMAT 'com.flywheeldata.awshive.hadoop.CloudTrailsFileInputForma
 OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveNullValueSequenceFileOutputFormat'
 LOCATION '/user/hue/aws_logs/generated/cloudtrails/';
 ```
+
+The library also supports files which contain a single key and multiple value entries:
+```json
+{
+	"key":{
+		"important":"stuff"
+	}
+	"value": [
+		{ "foo":"bar" },
+		{ "foo":"baz" }
+	]
+}
+```
+
+We'll present a row for each value, consisting of the entire key and the single value, for example the first row would be:
+```json
+{
+	"key": {
+		"important":"stuff"
+	}
+	"value" {
+		"foo":"bar"
+	}
+}
+```
+
+Here's the DDL to create that table:
+```sql
+CREATE EXTERNAL TABLE kv_raw
+(record STRING) 
+STORED AS
+INPUTFORMAT 'com.flywheeldata.awshive.hadoop.JsonKeyArrayValueFileInputFormat'
+OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveNullValueSequenceFileOutputFormat'
+LOCATION '/user/hue/aws_logs/generated/keyvalue/';
+```
+
+You can also parse that data:
+```sql
+CREATE EXTERNAL TABLE kv_parsed
+(key struct<
+  requestTime:string, apiVersion:string, requestId:string, methodName:string, objName:string
+  >, 
+  value struct<
+    foo:string
+  >) 
+ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'
+STORED AS
+INPUTFORMAT 'com.flywheeldata.awshive.hadoop.JsonKeyArrayValueFileInputFormat'
+OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveNullValueSequenceFileOutputFormat'
+LOCATION '/user/hue/aws_logs/generated/keyvalue/';
+```
