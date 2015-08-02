@@ -12,7 +12,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 
-public class KeyArrayValueFileInputFormat extends FileInputFormat<LongWritable, Text> {
+public class JsonKeyArrayValueFileInputFormat extends FileInputFormat<LongWritable, Text> {
 
 	@Override
 	public RecordReader<LongWritable, Text> getRecordReader(InputSplit split, JobConf job, Reporter reporter)

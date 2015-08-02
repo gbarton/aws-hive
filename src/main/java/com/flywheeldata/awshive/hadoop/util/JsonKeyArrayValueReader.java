@@ -106,7 +106,7 @@ public class JsonKeyArrayValueReader implements Closeable {
 				aStringBuilder.append(aParser.getText());
 				depth--;
 			} else if (token == JsonToken.FIELD_NAME) {
-				if (null != lastToken && !lastToken.isStructStart()) {
+				if (null != lastToken && !(lastToken == JsonToken.START_OBJECT || lastToken == JsonToken.START_ARRAY)) {
 					aStringBuilder.append(",");
 				}
 				quoteWrap(aStringBuilder, aParser.getText());
