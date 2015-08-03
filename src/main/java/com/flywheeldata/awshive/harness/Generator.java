@@ -7,10 +7,19 @@ import java.io.Writer;
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.json.simple.JSONValue;
 
+/**
+ * A data generator, writes random records of a specified type to standard out.
+ * Use the "--help" argument to print a help message listing arguments and
+ * syntax.
+ * 
+ * @author ksitt_000
+ *
+ */
 public class Generator {
 
 	public static void main(String[] args) throws IOException, ParseException {
@@ -18,9 +27,16 @@ public class Generator {
 		opts.addOption("t", "type", true,
 				"The type of record to generate, currently supported options are: CloudTrails, DummyKV");
 		opts.addOption("c", "count", true, "the number of records to generate");
+		opts.addOption("h", "help", false, "print the help message");
 
 		CommandLineParser parser = new BasicParser();
 		CommandLine cmd = parser.parse(opts, args);
+
+		if (cmd.hasOption('h')) {
+			HelpFormatter helpFormatter = new HelpFormatter();
+			helpFormatter.printHelp("generator", opts);
+			return;
+		}
 
 		String type = cmd.getOptionValue('t');
 		int count = Integer.parseInt(cmd.getOptionValue("c"));
